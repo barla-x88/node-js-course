@@ -1,75 +1,26 @@
-# Using NPM
+# How web works
 
-NPM stands for node pacakge manager and it comes preinstalled with node. It is a CLI app that we use to install and manage open source packages.
+![client-server model](imgs/image.png)
 
-To start using npm in our project we need to run
+When we go to some website the client makes a request and the server returns a response that contains the requested web page.
 
-```bash
-npm init
-```
+![Alt text](imgs/dns_lookup.png)
 
-This will create a package.json file (package.json) which contains the configuration for our project.
+A domain name is converted into ip address before the connection to the server is made. This happens through the DNS which converts a domain name to IP address.
 
-## Types of packages we can install with NPM
+![Alt text](imgs/socket_connection.png)
 
-There are two types of packages we can install with NPM. Those are **simple dependencies and development dependencies**. Simple or regular dependencies are simply packages which we include in our project, these contain the code upon which we build our project.
+When we have a real IP address, a TCP/IP socket connection is established between browser and server. This connection is kept alive for the entire time it takes to transfer all the files necessary for displaying a web page.
+TCP/IP are communcation protocol that define how the data travel across the web. They are internet's fundamental control system.
 
-To install a regular package run
-`npm install package_name (npm install package_name --save in older version of npm)`
+The job of TCP is to break the request and responses into thousands of small chunks before they are sent. Once they reach their destination they are reassembled. So the messages arrive at the destination quickly as possible which would not be possible if we send the request/response as one big chunk.
 
-After installing this package it is added as dependencies in the package.json file.
+The job of the IP is to send and route all these packets through the internet. It makes sure they they arrive at the correct destination.
 
-Besides regular dependencies we have development dependencies which are tools that we use during the development of project like - code bundlers or testing library. They are not needed of production. To install them we use -
+![Alt text](imgs/http_req.png)
 
-```bash
+Now we make a HTTP request. HTTP is another communication protocol. A protocol is simply a rule that allow two parties to communicate. HTTP allows clients and server to communicate by sending requests to the server and sending respose back to the client by server.
 
-npm install package_name --save-dev
-```
+![Alt text](imgs/http_res.png)
 
-After installing a new field called dev-dependencies will be created in the pacakge.json file and this pacakge will be added to the list.
-
-## Installing packages globally
-
-```bash
-npm install package_name --global
-```
-
-You need to become sudo to be able to install packages globally on linux or mac.
-
-## nodemon
-
-nodemon is a package that allows us watch changes in scripts and automatically restart the application if they change, to use nodemon we give the script name as argument like so -
-
-```bash
-nodemon index.js
-
-```
-
-## running locally installed packages
-
-to run locally installed package we need to create a command in scripts field on package.json file.
-
-```json
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
-  },
-
-```
-
-Then simply run `npm run start` or `npm start` because "start" is a special type of command.
-
-## updating packages
-
-In package.json our packages are listed in this format.
-"live-server": "^1.1.0"
-
-(^) means that we accept update for minor version and patch version.
-(-) means that we accept update for any version (major version included).
-(~)means that we just accept update for patch version.
-
-To check which packages are outdated run `npm outdated'. This give a list of outdated packages.
-
-To update a package we run `npm update package_name`
-
-To remove a package run `npm uninstall package_name`
+Now The server processes the request and sends back a HTTP response. A developers are responsible for sending correct data that is contained in 'body'.
