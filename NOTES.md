@@ -1,196 +1,124 @@
-# How Node JS works: A Look Behind the scene
+# Buliding API with express
 
-## NODE, V8, Libuv and C++
+## what is express
 
-Let's start by learning about node architecture. Let's represent this architecture in terms of node's dependencies. These are the libraries that are required for the Node to work correctly.
+express is a minimal node js framework build on top of node js which provides high level of abstraction. Express contains a very robust set of features like complex routing, easier handling of requests and responses, adding middlewares, server-side rendering etc.
 
-![Alt text](img/architecture.png)
+Express allows for rapid development of node js applications, It also makes it easier to organize our application into the MVC architecture.
 
-The node.js runtime has two most important dependencies - V8 an libuv.
-The V8 is what converts javascript code to machine code that a machine can understand. libuv is an open source library with a strong focus on asynchronous I/O. This layer gives node access to underlying operating system, filesystem and networking. Besides it also implements two important node js features which are **Event Loop** and **thread pool**.
+## postman
 
-The event loop is responsible for handling easy tasks like executing callbacks and network I/O while the thread pool is for more heavy works like file access or compression work.
+[Postman](https://www.postman.com/) is a software for testing API which also aids in development of APIs.
+It's kind of browser where we can enter an URL an make an request.
 
-The node js ties all these libraries and gives us access to their functions in pure javascript. It provides a layer of abstraction to make our life easier.
+[Linux Installation](https://learning.postman.com/docs/getting-started/installation-and-updates/#installing-postman-on-linux)
 
-Some other libraries include -
+## Installing express
 
-- http-parser - for parsing http
-- c-ares - for dns requests stuff
-- openSSL - for cryptography
-- zlib - for compression
+Let's install express, create a simple server and do some basic routing.
 
-## Processes, Threads and the Thread Pool
-
-Whenever we use node on a computer that means there is a node process running on the computer. We already know that node js is a C++ process. In this process node js runs in a single thread. A thread is just a sequence of instruction, Imagine a thread as a box where our code is executed in computer's processor. Since node runs in a single thread, it makes it easy to block node applications. It doesn't matter if you have 10 user or 10 million users accessing your application at same time, the node runs in a single thread. So we need to very careful about not blocking that thread.
-
-Let's what happens in a single thread when a program is run -
-
-![Alt text](img/process.png)
-
-The event loop is where most of the work is done in the app.Some tasks are two heavy to be executed in the event loop because they would block single thread. That's where the Thread pool comes in, it is provided to node js by the libuv. This gives us four other threads that are completely separate from the single thread. We can configure up to use 128 threads but 4 are enough.
-
-![Alt text](img/thread_pool.png)
-
-Event loop can offload heavy tasks to the thread pool. All this happens automatically behind the scene. A developer cannot decide what goes to the thread pool and what don't. The following tasks are handled in thread pool -
-
-- File system APIs
-- Cyrptography
-- Compression
-- DNS lookup
-
-## The node js Event loop
-
-The event loop is where all the application code that is inside callback function is executed. Some parts might get offloaded to the thread pool as we saw earlier.
-The event loop is the heart of node architecture. Event loop is what makes asynchronus programming possible in Node js. Node js is build around callback functions, so function are called as soon as some work is finished. It works this way because node uses an **Event-driven architecture**: So task like http request or finished file reading process will emit events, event loop picks up these events and call the callback functions that are associated with each events.
-
-**How does this all work behind the scene, in what order the callbacks are executed?**
-
-When we start our node application the event loop starts running right away. The event loop has multiple phases and each phase has a callback queue which are the callbacks coming from the events that the event loop receives.
-There are 4 important phase of event loop -
-
-![Alt text](img/event_loop.png)
-
-- The first phase takes care of callback of expired timers. These are the first one to be processed by the event loop. If the timer expires later during one of the other phases are being processed then callback of that timer will only be called as soon as the event loop comes back to this first phase. Callbacks of 4 phases are processed this way, callbacks of each queue are processed one by one untill there is no one is left in the queue, then only the event loop will enter next phase.
-- The second phase processes the I/O polling and execution of I/O callbacks. The polling means looking for I/O events that are ready to be processed and putting them in callback queue. In the context of node js I/O simply means networking and file access. This is the phase where 99% of our code is executed.
-- The third phase is for setimmediate callbacks. setimmediates are special kind of timer that we can use if we want to process callbacks immediately after the I/O polling and execution phase.
-- The fourth phase is for close callbacks, these are not that important for us. In this phase all close events are processed for example when a web server or web socket shuts down.
-
-Beside these queues there are 2 other queues which are -
-
-- Process.nexttick() queue
-- other microtasks queue (resolved promises)
-
-After each phase if there are any callbacks in any of these two special queues, they will be executed right away.
-Process.nexttick() is a function which we can use when we really need to execute certain callback right after the current event loop phase. It is similar to setimmediate with the difference that setimmediate will run only after the I/O phase.
-
-![Alt text](img/event_loop_tick.png)
-
-When we go through all these phases we say we finished a one event loop tick. This tick is just one cycle in this loop. Now it's time to decide whether the loop should continue to the next tick or if the program should exit.
-Now the node checks if there are any pending timers or I/O tasks running in background and if there are not any, then it will exit the application.
-
-**Here is how not to block the single thread in which node js process runs** -
-
-- Don't use sync version of functions in fs,crypto and zlib modules in your callback functions.
-- Don't perform complex calculations in event loop ( e.g loop inside loop)
-- be careful with JSON in large objects - It may take a very long time to parse or stringify Json.
-- Don't use too complex regular expressions (e.g. nested quantifiers)
-
-[Read More about Event Loop](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick)
-
-## The event-driven architecture
-
-Most of the node js core module like http, filesystem and timers are all build around an event driven architecture. We can also use this architecture to our advantage in our own code.
-
-![Event driven architecure](img/event-driven-arch.png)
-
-In node there are certain objects like Event Emitter that emit named events as sonn as something important happens in our code. These events can be picked up by event listeners that developers setup which will fire callback functions.
-This event emitter logic is called **observer pattern** in javascript. The idea is to setup an observer (listner) which keeps waiting/observing the subject that will emit the event that the listner is waiting for. The opposite of this pattern is functions calling other functions.
-
-To create an object that emitts some event we use Event Emiiter class. It's a built in module of node js.
-
-```js
-const EventEmitter = require("events");
-
-const myEmitter = new EventEmitter();
-
-//setup a listner
-myEmitter.on("newSale", () => {
-  console.log("There was a new sale.");
-});
-
-//emit a named event
-myEmitter.emit("newSale");
+```bash
+npm i express
 ```
 
-We can setup multiple listner for the same event. We can also pass arguments to the event listner by passing additional arguments to the `emit` method. In practise if we want to implement this pattern in our code then it is recommended that we create a new class that inherits from `EventEmitter` class. This is how modules like http & filesystem work by extending the EventEmitter class.
+Create a new file called app.js where we save configuration for entire app. It's a convention to save all application configuration in a 'app.js' file.
 
-## Streams
-
-Streams are another fundamental concepts in Node js.
-With streams we can process (red and write) data piece by piece (chunks), Without completing the whole read or write operation, therefore we don't have to keep all the data in memory to do this operation. When we read files using streams, we read part of data, do something with it and then free the memory. we repeat this process until the entire file is processed.
-Think of services like netflix and youtube, these stream videos using the same principle. So we don't need for the entire video file to load before we can watch it beacause data is received and processed in chunks. This concept of streams is universal to computer science in general. These characterstics make streams perfect for handling large volume of data like videos.
-
-In node there are four fundamental type of streams -
-
-- Readable streams
-- Writable streams
-- duplex streams
-- transform streams
-
-Readable and writable streams are most important.
-
-![streams](img/streams.png)
-
-**Streams in practice**
-Let's say that we need to read a large text file and send it to the client. There are multiple ways we can do this -
+In app.js
 
 ```js
-const fs = require("fs");
-const server = require("http").createServer();
+const express = require('express');
 
-server.on("request", (req, res) => {
-  fs.readFile("test-file.txt", (err, data) => {
-    if (err) console.log(err);
-    res.end(data);
-  });
+const app = express();
+
+//port on which the server will listen
+const port = 3000;
+
+//define routes using get method
+
+//response will be sent if server receives a get request
+app.get('/', (req, res) => {
+  //also send a response status
+  res.status(200).send('Hello from the express app.');
 });
 
-server.listen(8000, "127.0.0.1", () => {
-  console.log("listening");
+//easily send a json
+app.get('/getJson', (req, res) => {
+  //json method takse an object
+  //automatically sets content-type: application/json
+  res.status(200).json({ projectName: 'Natours', version: '1.4' });
+});
+
+//handle post request with post method
+app.post('/', (req, res) => {
+  res.status(200).send('Data saved.');
+});
+
+//start server
+app.listen(3000, () => {
+  console.log(`App running on port ${port}.`);
 });
 ```
 
-The problem with this solution is that node needs to read the entire file into memory then only it can send the data to the client.
-This works fine for testing something during the development but using it in production is not going to work. If we receive tons of request this thing will crash.
+## APIs and Restful API design
 
-Let's use streams to fix these issues -
-we create a readable stream then as we receive each chunk of data we send it to the client as a response (writable stream).
+API: A piece of software that can be used by another piece of software, in order to allows applications to talk to each other.
 
-```js
-const fs = require("fs");
-const server = require("http").createServer();
+REST stands for **representational state transfer**. It's a way of building web APIs in a logical way to make them easy to consume. To build REST APIs we need to follow some principles -
 
-server.on("request", (req, res) => {
-  const readable = fs.createReadStream("test-file.txt");
+- Separate API into logical resources
+- expose resources using structured, resource-based URLs
+- use HTTP methods (verbs) - To perform different action on data like read, create, delete, the API should use right HTTP method
+- Send data as JSON - Send or receive JSON data format
+- API must be stateless
 
-  // Each time there is new chunk of data that can be consumed
-  //Redable stream emits 'data' event
-  readable.on("data", (chunk) => {
-    // response is writable stream
-    //write data to writable stream
-    res.write(chunk);
-  });
+Let's look into details about all these principles-
 
-  //handling when entire file is read
-  //without this, this solution will not work
-  readable.on("end", () => {
-    res.end();
-  });
+Let's start with resources. In our example API, The key abstraction of information in REST is a resource. Therefore all the data that we want to send in the API should be divided into logical resources. In context of REST, a resource is an object or representation of something which has some data associated with it. For example tours for users, or reviews, basically any information that can be named is a resource. It has to be a name not a "Verb".
 
-  readable.on("error", (err) => {
-    console.log(err);
-    res.end("File not Found.");
-  });
-});
+![Resource](img/resource.png)
 
-server.listen(8000, "127.0.0.1", () => {
-  console.log("listening");
-});
-```
+We need to expose (make available) the data using some structured URLs that the client can send request to. For example -
 
-There is still a problem with this approach, our readble stream is much faster than actually sending the result with respone writable stream over the network. This will overwhelm the response stream which cannot handle all this incomming data so fast. This problem is called **Backpressure**. To fix this we can use the pipe operator. It is available on all readable streams and it allows us to pipe the output of a readable stream right into the input of a writable stream. This fixes the problem of backpressure because it will handle the speed of the data comming in and the speed of the data going out.
+![url](img/url.png)
 
-```js
-const fs = require("fs");
-const server = require("http").createServer();
+/getTour
 
-server.on("request", (req, res) => {
-  const readable = fs.createReadStream("test-file.txt");
-  readable.pipe(res); // readableSource.pipe(writableDest)
-});
+/updateTour
 
-server.listen(8000, "127.0.0.1", () => {
-  console.log("listening");
-});
-```
+/deleteTour
+
+/getToursByUser
+
+APIs have many endpoints like the above fictional endpoints, each of which will send different data to the client & also perform different actions. Note that there is something very wrong with these endpoints here, because they don't follow the third rule which says the we should only use HTTP methods in order to perform actions on data. Endpoints should only contain the "resources" and not the actions that can be performed on them because it will become very hard to maintain.
+
+let's see how these endpoints should actually look like -
+
+/getTour - This endpoint is for getting data about the tour and so we should simply name this endpoint "tours" and send the data when a GET request is made to this endpoint. Now we have only the resource in the endpoint and no verb, because the verb is now in HTTP Method. It's a convention to use plurals in endpoint names. The convention is that calling this endpoint we get back all the tours that are in database. If we only want a tour with one id we add that id after slash (/) or in a search query or it could also be the name of the tour or some other unique identifier.
+
+![endpoint](img/endpoint.png)
+
+The first HTTP method or verb that we can respond to is GET. It's used to perform read operation on data.
+
+![endpoints](img/endpoints.png)
+
+If a client want to create a resource in database the POST method should be used. we already know that a POST request can be used to send data to the server. In this case no id will be sent because the id will be figured out by the server.
+
+To update existing resources either a PUT or PATCH request should be made to the endpoint. The difference between these two is that with PUT client is supposed to send entire updated object while with PATCH it is supposed to send only the part of the object that has been changed.
+
+To delete a resource we use DELETE method. The unique identifier of the resource that need to be deleted should be part of the URL.
+
+To perform these kinds of action the client needs to be authenticated, We'll take a look at how we can do this later in the course.
+
+Beside these can be actions that are not CRUD like login or search operation. In that case we need be a little creative with our endpoints. We can use a endpoint name like /login. We'll talk about these cases later.
+
+This is how we use HTTP methods to build user friendly and nicely structured URLs. They are easy and logical to consume for the client.
+
+Now About the data that the client usually receives or the server receives from the client, we usually use the JSON data format. JSON is very lightweight data interchange format that is heavily use in REST APIs coded in any language. It is so widely used because its easy to understand and write JSON for both humans and computers.
+
+![json](img/json.png)
+
+Before sending the JSON we usually do some response formatting before sending. There are some standards for it and we'll use a very simple one called **Jsend**. So we simply create an object and add some status messages in it to inform the client whether the request was successful or not then we put our actual data in a object called **data**. Wraping the data into an additional object is called **enveloping**, It's a common practice to mitigate some security issues and other problems. There are other standards for response formatting like JSOPN:API, OData JSON protocol.
+
+Finally a RESTful API should always be stateless. In a stateless RESTful API all state is handled on the client. State simply refers to the piece of data in the application that might change over time for example Whether a certain user is 'logged in' or in a page with list of several pages what's the 'current page'. Now the fact that the state should be handled on the client means that each request must contain all the necessary information to process a certain request on the server. So the server should never have to remember the previous request in order to process the current request. Let's take the list of several pages as an example, let's say we are currently on page 5 and we want to move forward to page 6. We can have a simple endpoint like **GET /tours/nextPage** and make a request to it, In this case the server needs to figure out what the current page is and based on that send the next page to the client. It needs to remember the previous request and it needs to handle the request server side. This is exactly what we want to avoid in RESTful APIs. In this case we should create a **/tours/page** endpoint and pass the number 6 to it in order to request page number 6. This way we'll handle state on the client.
+
+![Alt text](img/state.png)
