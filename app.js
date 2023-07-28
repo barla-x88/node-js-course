@@ -12,8 +12,7 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-//callback function is called "Route Handler"
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
   //performing response formatting using Jsend specification
   res.status(200).json({
     status: 'success',
@@ -22,10 +21,25 @@ app.get('/api/v1/tours', (req, res) => {
       tours: tours,
     },
   });
-});
+};
 
-//handling post requests to the server
-app.post('/api/v1/tours', (req, res) => {
+const getTour = (req, res) => {
+  //all paramters can be found in req.params object
+  //convert id to integer
+  const id = parseInt(req.params.id);
+
+  const tour = tours.find((tour) => tour.id === id);
+
+  //send a response
+  res.status(tour ? 200 : 404).json({
+    status: tour ? 'success' : 'fail',
+    data: {
+      tour,
+    },
+  });
+};
+
+const createTour = (req, res) => {
   //create new ID for tour
   const newId = tours[tours.length - 1].id + 1;
 
@@ -49,33 +63,9 @@ app.post('/api/v1/tours', (req, res) => {
       });
     }
   );
-});
+};
 
-//handle URL parameters
-//we can also use multiple params like so
-// '/api/v1/tours/:id/:city'
-// Mark any param optional by appending '?' to it like
-//''/api/v1/tours/:id/:city?'
-
-app.get('/api/v1/tours/:id', (req, res) => {
-  //all paramters can be found in req.params object
-  //convert id to integer
-  const id = parseInt(req.params.id);
-
-  const tour = tours.find((tour) => tour.id === id);
-
-  //send a response
-  res.status(tour ? 200 : 404).json({
-    status: tour ? 'success' : 'fail',
-    data: {
-      tour,
-    },
-  });
-});
-
-//handling patch request
-
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
   //find the tour
   //change property in tour
   // save it to the file
@@ -85,9 +75,9 @@ app.patch('/api/v1/tours/:id', (req, res) => {
       tour: '<updated tour here>',
     },
   });
-});
+};
 
-app.delete('/api/v1/tours/:id', (req, res) => {
+const deleteTour = (req, res) => {
   //find the tour
   //delete tour
   // save it to the file
@@ -95,7 +85,28 @@ app.delete('/api/v1/tours/:id', (req, res) => {
     status: 'sucess',
     data: null,
   });
-});
+};
+
+// defining and handle routes
+// app.get('/api/v1/tours', getAllTours);
+
+// app.post('/api/v1/tours', createTour);
+
+// app.get('/api/v1/tours/:id', getTour);
+
+// app.patch('/api/v1/tours/:id', updateTour);
+
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+//Another way to handle routes
+
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const port = 3000;
 
