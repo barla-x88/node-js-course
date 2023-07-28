@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
 
@@ -7,22 +8,7 @@ const app = express();
 //'express.json()' is a middleware,
 app.use(express.json());
 
-//create own middleware function
-app.use((req, res, next) => {
-  //logging something for example
-  console.log(`Request for ${req.path} FROM ${req.ip}`);
-
-  //necessary to call next, else req will be stuck here
-  // and request responce cycle won't complete
-  next();
-});
-
-// manipulate req object with middleware
-app.use((req, res, next) => {
-  // adding a property to request object
-  req.requestTime = new Date().toISOString();
-  next();
-});
+app.use(morgan('dev'));
 
 //read the data first and convert the JSON to object
 const tours = JSON.parse(

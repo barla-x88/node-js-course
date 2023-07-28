@@ -258,3 +258,18 @@ app.use((req, res, next) => {
   next();
 });
 ```
+
+## using 3rd party middleware
+
+we can use a 3rd party middleware called 'morgan' which is widely used for logging in our app. This is available in npm repository.
+
+```bash
+npm install morgan
+```
+
+```js
+const morgan = require('morgan');
+app.use(morgan('dev'));
+```
+
+Behind the scene when we call a function inside app.use, the function returns another function similar to the one we created above inside app.use() in 'create own middleware functions' section.
