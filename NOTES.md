@@ -122,3 +122,100 @@ Before sending the JSON we usually do some response formatting before sending. T
 Finally a RESTful API should always be stateless. In a stateless RESTful API all state is handled on the client. State simply refers to the piece of data in the application that might change over time for example Whether a certain user is 'logged in' or in a page with list of several pages what's the 'current page'. Now the fact that the state should be handled on the client means that each request must contain all the necessary information to process a certain request on the server. So the server should never have to remember the previous request in order to process the current request. Let's take the list of several pages as an example, let's say we are currently on page 5 and we want to move forward to page 6. We can have a simple endpoint like **GET /tours/nextPage** and make a request to it, In this case the server needs to figure out what the current page is and based on that send the next page to the client. It needs to remember the previous request and it needs to handle the request server side. This is exactly what we want to avoid in RESTful APIs. In this case we should create a **/tours/page** endpoint and pass the number 6 to it in order to request page number 6. This way we'll handle state on the client.
 
 ![Alt text](img/state.png)
+
+## Building the API
+
+We'll start by just handling the GET request. Our endpoint will be `/api/v1/tours`. It's a good practice to also include the API version because in case you wish to change something we can use a endpoint like `/api/v2/tours`. So we'll not break something for people who still use v1.
+
+```js
+const fs = require('fs');
+const express = require('express');
+
+const app = express();
+
+//read the data first and convert the JSON to object
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+//callback function is called "Route Handler"
+app.get('/api/v1/tours', (req, res) => {
+  //performing response formatting using Jsend specification
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      tours: tours,
+    },
+  });
+});
+
+const port = 3000;
+
+app.listen(3000, () => {
+  console.log(`App running on port ${port}.`);
+});
+```
+
+with a POST request we can send data from the client to the server. This data is available in the 'request' parameter. Out of the box Express doesn't put `body` data sent by the client into request object. In order to have that data available we have to use something called 'middleware'. Middleware is just a function that can modify incoming request data. It is called middleware because it stands between request and response, It's just a step the request goes through while it is being processed. The step the request goes through in this example is simply that the data from the body is added to the request object by using `express.json()` middleware.
+
+```js
+//Using middleware
+//'express.json()' is a middleware,
+app.use(express.json());
+
+//handling post requests to the server
+app.post('/api/v1/tours', (req, res) => {
+  //create new ID for tour
+  const newId = tours[tours.length - 1].id + 1;
+
+  const newTour = { ...req.body, id: newId };
+
+  tours.push(newTour);
+
+  //write new Tour to file
+  //Remember to not call sync functions inside callback,
+  //because we don't want to block event loop
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      //201 = created
+      res.status(201).json({
+        status: 'success',
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+});
+```
+
+## Defining parameters in the URL
+
+We want to get a single tour from endpoint, for this to work we need to find a way to provide parameters in the URL and respond to the request accordingly. we need to define a route that can accept a variable.
+
+```js
+//handle URL parameters
+//we can also use multiple params like so
+// '/api/v1/tours/:id/:city'
+// Mark any param optional by appending '?' to it like
+//''/api/v1/tours/:id/:city?'
+
+app.get('/api/v1/tours/:id', (req, res) => {
+  //all paramters can be found in req.params object
+  //convert id to integer
+  const id = parseInt(req.params.id);
+
+  const tour = tours.find((tour) => tour.id === id);
+
+  //send a response
+  res.status(tour ? 200 : 404).json({
+    status: tour ? 'success' : 'fail',
+    data: {
+      tour,
+    },
+  });
+});
+```
