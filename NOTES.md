@@ -219,3 +219,42 @@ app.get('/api/v1/tours/:id', (req, res) => {
   });
 });
 ```
+
+## Middleware and the request-response cycle
+
+To start a request response cycle express app receives a request for which it will create a request and response objects. The data is processed and used to generate a meaningful response. In order to process the data we use **middlewares** which can manipulate the request and response objects or execute any other code that we like. Before we used `express.json` middleware to get access to the request body on request object. It's called middleware because it's a function which is executed in the middle or receiving a request and sending the reponse. We can say that in express everything is middleware even our route definitions, these are the functions that are executed for certain routes. Some examples of middlewares are -
+
+- express.json - also called body parser,
+- logging functions
+- header setting functions
+
+![middleware](img/middleware.png)
+
+All the middlewares we use in the app are collectively called **middleware stack **. The order of middleware in the stack is defined by the order they are defined in the code. A middleware that appears first in the code is executed before the one that appears latter. The order of code matters a lot in express.
+
+Our request and response object go through each middleware where they are processed. At the end of each middleware function a `next()` function is called, we have access to this function in each middleware function. Now the next middleware in the stack will be executed with request and response object. When we reach the last middleware which is usually a route handler, we don't call the next() function but send data to the client. In this way we finish the request response cycle.
+
+## create own middleware functions
+
+```js
+//Using middleware
+//'express.json()' is a middleware,
+app.use(express.json());
+
+//create own middleware function
+app.use((req, res, next) => {
+  //logging something for example
+  console.log(`Request for ${req.path} FROM ${req.ip}`);
+
+  //necessary to call next, else req will be stuck here
+  // and request responce cycle won't complete
+  next();
+});
+
+// manipulate req object with middleware
+app.use((req, res, next) => {
+  // adding a property to request object
+  req.requestTime = new Date().toISOString();
+  next();
+});
+```

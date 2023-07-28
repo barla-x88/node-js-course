@@ -7,6 +7,23 @@ const app = express();
 //'express.json()' is a middleware,
 app.use(express.json());
 
+//create own middleware function
+app.use((req, res, next) => {
+  //logging something for example
+  console.log(`Request for ${req.path} FROM ${req.ip}`);
+
+  //necessary to call next, else req will be stuck here
+  // and request responce cycle won't complete
+  next();
+});
+
+// manipulate req object with middleware
+app.use((req, res, next) => {
+  // adding a property to request object
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
 //read the data first and convert the JSON to object
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
@@ -16,6 +33,7 @@ const getAllTours = (req, res) => {
   //performing response formatting using Jsend specification
   res.status(200).json({
     status: 'success',
+    requestedAt: req.requestTime,
     results: tours.length,
     data: {
       tours: tours,
@@ -86,19 +104,6 @@ const deleteTour = (req, res) => {
     data: null,
   });
 };
-
-// defining and handle routes
-// app.get('/api/v1/tours', getAllTours);
-
-// app.post('/api/v1/tours', createTour);
-
-// app.get('/api/v1/tours/:id', getTour);
-
-// app.patch('/api/v1/tours/:id', updateTour);
-
-// app.delete('/api/v1/tours/:id', deleteTour);
-
-//Another way to handle routes
 
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
