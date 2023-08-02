@@ -91,13 +91,59 @@ const deleteTour = (req, res) => {
   });
 };
 
-app.route('/api/v1/tours').get(getAllTours).post(createTour);
+const getAllUsers = (req, res) => {
+  // 500 => internal server error
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined.',
+  });
+};
+const createUser = (req, res) => {
+  // 500 => internal server error
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined.',
+  });
+};
 
-app
-  .route('/api/v1/tours/:id')
-  .get(getTour)
-  .patch(updateTour)
-  .delete(deleteTour);
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined.',
+  });
+};
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined.',
+  });
+};
+
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined.',
+  });
+};
+
+// Using separate routers
+
+const tourRouter = express.Router();
+const userRouter = express.Router();
+
+//will run at root of '/api/v1/tours'
+tourRouter.route('/').get(getAllTours).post(createTour);
+
+tourRouter.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+
+// Users route
+userRouter.route('/').get(getAllUsers).post(createUser);
+
+userRouter.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+
+//we want to use techRouter for a specific route
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
 const port = 3000;
 

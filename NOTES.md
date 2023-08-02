@@ -273,3 +273,30 @@ app.use(morgan('dev'));
 ```
 
 Behind the scene when we call a function inside app.use, the function returns another function similar to the one we created above inside app.use() in 'create own middleware functions' section.
+
+## creating and mounting multiple routers
+
+Let's now use multiple routers and use a process called **mounting**. We need to create separate routers for each of the resources/routes. Right now all our routes are on the same router- the `app` router.
+
+```js
+const tourRouter = express.Router();
+```
+
+To connect this router to our application we need to use it as a middleware. This new modular `tourRouter` is actually a real middleware. This is how we do it -
+
+```js
+const tourRouter = express.Router();
+
+//will run at root of '/api/v1/tours'
+tourRouter.route('/').get(getAllTours).post(createTour);
+
+tourRouter.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+
+// Using separate routers
+
+//we want to use techRouter for a specific route
+// This is called mounting a router, mounting a router on a route.
+app.use('/api/v1/tours', techRouter());
+```
+
+When an incoming request for /api/v1/tours comes it goes into the middleware stack it matches the url '/api/v1/tours' and our tourRouter middleware router function will run.
