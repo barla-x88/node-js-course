@@ -348,3 +348,15 @@ router.route('/').get(getAllTours).post(checkBody, createTour);
 ```
 
 When a post request is made the checkBody middleware function runs first before running the createTour function.
+
+## serving static files
+
+To serve static files we need to use a built in express middleware called **express.static**. This middleware function takes the directory from which express will serve static files.
+
+```js
+//serve static contents
+// serve files from public folder in current dir
+app.use(express.static(`${__dirname}/public`));
+```
+
+go to http://localhost:3000/overview.html to see a page.
