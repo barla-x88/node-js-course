@@ -294,9 +294,39 @@ tourRouter.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
 // Using separate routers
 
-//we want to use techRouter for a specific route
+//we want to use tourRouter for a specific route
 // This is called mounting a router, mounting a router on a route.
 app.use('/api/v1/tours', techRouter());
 ```
 
 When an incoming request for /api/v1/tours comes it goes into the middleware stack it matches the url '/api/v1/tours' and our tourRouter middleware router function will run.
+
+## PARAM middleware
+
+**PARAM middleware** is a middleware that only runs for certain parameters, i.e. when we have certain parameters in our URL. Right now the only parameter we have in our URL is `id`. so We can now write a middleware that only runs when `id` is present in the URL. This is how we do it -
+
+In tourRoutes.js -
+
+```js
+const router = express.Router();
+
+//param middleware
+//takes the parameter string for which middleware will run
+// In the callback we get access to 4th param, which is value of parameter 'id'
+//this middleware will only run if 'tours' resource is requested and 'id' is present
+router.param('id', (req, res, next, val) => {
+  //do something
+  console.log(`Tour is is ${val}`);
+  next();
+});
+
+//will run at root of '/api/v1/tours'
+router.route('/').get(getAllTours).post(createTour);
+
+router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+```
+
+One practical use for param middleware is to check if the id is valid before the request hits the handler function. We can say that this middleware is now part of our **pipeline**.
+In tourController.js we create and middleware function and export it then we use it in tourRoutes.js.
+
+We could also create a function that could check for the id then call this function inside the handler functions but this would go against the philosophy of express where we should always work with this kind of pipeline as much as we can.

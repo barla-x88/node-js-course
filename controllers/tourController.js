@@ -5,6 +5,18 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+//Middleware to be used tourRoutes.js
+exports.checkID = (req, res, next, val) => {
+  if (val > tours.length) {
+    //return statement is neccessary to that the next() function is not called
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   //performing response formatting using Jsend specification
   res.status(200).json({
