@@ -17,6 +17,17 @@ exports.checkID = (req, res, next, val) => {
   next();
 };
 
+//checkBody middleware
+exports.checkBody = (req, res, next) => {
+  if (!(req.body.name && req.body.price)) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Missing name or price',
+    });
+  }
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   //performing response formatting using Jsend specification
   res.status(200).json({

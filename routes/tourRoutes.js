@@ -1,8 +1,15 @@
 const tourController = require('./../controllers/tourController');
 const express = require('express');
 
-const { getAllTours, createTour, getTour, updateTour, deleteTour, checkID } =
-  tourController;
+const {
+  getAllTours,
+  createTour,
+  getTour,
+  updateTour,
+  deleteTour,
+  checkID,
+  checkBody,
+} = tourController;
 
 //convention to simply call it router
 const router = express.Router();
@@ -24,7 +31,7 @@ router.param('id', (req, res, next, val) => {
 router.param('id', checkID);
 
 //will run at root of '/api/v1/tours'
-router.route('/').get(getAllTours).post(createTour);
+router.route('/').get(getAllTours).post(checkBody, createTour);
 
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 

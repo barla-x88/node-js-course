@@ -330,3 +330,21 @@ One practical use for param middleware is to check if the id is valid before the
 In tourController.js we create and middleware function and export it then we use it in tourRoutes.js.
 
 We could also create a function that could check for the id then call this function inside the handler functions but this would go against the philosophy of express where we should always work with this kind of pipeline as much as we can.
+
+## chaining multiple middleware functions
+
+Let's see how we can chain multiple middleware function for the same routes.
+
+```js
+router.route('/').get(getAllTours).post(createTour);
+```
+
+In this example we have only one middleware function for post, but we may want to check if the request contains all the necessary details before we create a resource. This is similar to what we did in example for param middleware where we checked for ID.
+
+we create a middleware function in tourController.js then export it. In the tourRoutes.js this is how we chain this middleware function to other middleware functions -
+
+```js
+router.route('/').get(getAllTours).post(checkBody, createTour);
+```
+
+When a post request is made the checkBody middleware function runs first before running the createTour function.
