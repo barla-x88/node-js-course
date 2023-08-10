@@ -360,3 +360,23 @@ app.use(express.static(`${__dirname}/public`));
 ```
 
 go to http://localhost:3000/overview.html to see a page.
+
+## Environment variables
+
+We use `dotenv` package to use environment variables saved in a file. To parse the `config.env` file we require the dotenv module and specify a path to config file. All the environment variables will be available in `process.env` Object.
+
+```js
+const dotenv = require('dotenv');
+
+//location of file containing env variables
+dotenv.config({ path: './config.env' });
+
+const app = require('./app');
+
+//using environment variables
+const port = process.env.PORT;
+
+app.listen(port, () => {
+  console.log(`App running on port ${port}.`);
+});
+```
