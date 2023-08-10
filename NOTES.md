@@ -135,7 +135,7 @@ const app = express();
 
 //read the data first and convert the JSON to object
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`),
 );
 
 //callback function is called "Route Handler"
@@ -187,7 +187,7 @@ app.post('/api/v1/tours', (req, res) => {
           tour: newTour,
         },
       });
-    }
+    },
   );
 });
 ```
@@ -380,3 +380,42 @@ app.listen(port, () => {
   console.log(`App running on port ${port}.`);
 });
 ```
+
+# Using monogDB with Mongoose
+
+## connecting our database with the express app
+
+To connect our mongodb server to express app we need a connection string, which looks something like this - (This may change in future)
+
+```
+mongodb+srv://barlax88:<password>@cluster0.d2mg6mv.mongodb.net/?retryWrites=true&w=majority
+```
+
+We save a password for accessing the database in config.env file.
+
+We'll use a latest Mongoose drive to connect to the database server instead of using native node.js driver.
+
+```
+npm i mongoose
+```
+
+connect to the database in our code -
+
+```js
+//prepare a connection string
+const DB = process.env.DATABASE.replace(
+  'PASSWORD',
+  process.env.DATABASE_PASSWORD,
+);
+
+mongoose
+  .connect(DB, {
+    dbName: 'natours',
+  })
+  .then((con) => {
+    console.log(con.connections);
+    console.log('DB connection successful');
+  });
+```
+
+In course options were passed to the connect method that i couldn't find in the docs. So those options are not included. The connect method returns a promise so we use then method to use resolve value (connection object) of promise.
