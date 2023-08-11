@@ -383,6 +383,16 @@ app.listen(port, () => {
 
 # Using monogDB with Mongoose
 
+Mongoose is object data modelling library for mongodb providing higher level of abstraction. It the kind of relationship between express and node. Express provides layer of abstraction over node while mongoose provides layer of abstraction over regular node Mongodb driver.
+
+An object data modelling library is just a way to write javascipt code that will then iteract with database. we could use regular mongodb driver to access the database but we choose mongoose because it provides lot of functionality out of the box allowing for faster and simpler development of applications.
+
+- It provides schemas to model our data and relationship.
+- east data validation
+- a simple query API, middleware and much more
+
+In mongoose **schema** is where we model data, here we describe structure of the data, default values and validation. we then take this schema and create a model out of it. A model is wrapper around the schema which allows us to interact with the data in order to create, update, delete and read documents.
+
 ## connecting our database with the express app
 
 To connect our mongodb server to express app we need a connection string, which looks something like this - (This may change in future)
@@ -419,3 +429,49 @@ mongoose
 ```
 
 In course options were passed to the connect method that i couldn't find in the docs. So those options are not included. The connect method returns a promise so we use then method to use resolve value (connection object) of promise.
+
+## creating a simple tour model
+
+let's create a very simple schema and model for our application. For now let's do these all things in server.js file.
+Mongoose is all about models, a model is just a blueprint which we use to create actual document. It's a bit like classes in javascript. We also use these models to query, update and delete these documents.
+
+We specify the fields of the document and the type of data each field will contain.
+
+```js
+//create a schema
+const tourSchema = new mongoose.Schema({
+  name: String,
+  rating: Number,
+  price: Number,
+});
+```
+
+we can also take it a step further by defining schema type options for fields.
+
+```js
+const tourSchema = new mongoose.Schema({
+  name: {
+    type: String,
+
+    // contains value for field and error message in case of error
+    required: [true, 'A tour must have a name'],
+
+    //name should be unique
+    unique: true,
+  },
+
+  //also define default values
+  rating: {
+    type: Number,
+    default: 4.5,
+  },
+  price: {
+    type: Number,
+    required: [true, 'A tour must have a price'],
+  },
+});
+```
+
+schema type options can be different for different data types but many of them are also similar. 'required' and 'unique' are known as validators, we can also create our own validators.
+
+Now let's create a model out of this schema.
