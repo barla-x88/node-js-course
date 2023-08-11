@@ -480,3 +480,10 @@ const tourSchema = new mongoose.Schema({
 schema type options can be different for different data types but many of them are also similar. 'required' and 'unique' are known as validators, we can also create our own validators.
 
 Now let's create a model out of this schema.
+
+```js
+//create a model out of schema
+//convention to start a model name with uppercase
+// model method takes two arg- tour name and schema
+const Tour = mongoose.model('Tour', tourSchema);
+```
