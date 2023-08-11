@@ -383,6 +383,7 @@ app.listen(port, () => {
 
 # Using monogDB with Mongoose
 
+<<<<<<< HEAD
 Mongoose is object data modelling library for mongodb providing higher level of abstraction. It the kind of relationship between express and node. Express provides layer of abstraction over node while mongoose provides layer of abstraction over regular node Mongodb driver.
 
 An object data modelling library is just a way to write javascipt code that will then iteract with database. we could use regular mongodb driver to access the database but we choose mongoose because it provides lot of functionality out of the box allowing for faster and simpler development of applications.
@@ -392,6 +393,10 @@ An object data modelling library is just a way to write javascipt code that will
 - a simple query API, middleware and much more
 
 In mongoose **schema** is where we model data, here we describe structure of the data, default values and validation. we then take this schema and create a model out of it. A model is wrapper around the schema which allows us to interact with the data in order to create, update, delete and read documents.
+
+=======
+
+> > > > > > > b475a1e15c39071e871f96b44a467d6c00326211
 
 ## connecting our database with the express app
 
