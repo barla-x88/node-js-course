@@ -383,7 +383,6 @@ app.listen(port, () => {
 
 # Using monogDB with Mongoose
 
-<<<<<<< HEAD
 Mongoose is object data modelling library for mongodb providing higher level of abstraction. It the kind of relationship between express and node. Express provides layer of abstraction over node while mongoose provides layer of abstraction over regular node Mongodb driver.
 
 An object data modelling library is just a way to write javascipt code that will then iteract with database. we could use regular mongodb driver to access the database but we choose mongoose because it provides lot of functionality out of the box allowing for faster and simpler development of applications.
@@ -393,10 +392,6 @@ An object data modelling library is just a way to write javascipt code that will
 - a simple query API, middleware and much more
 
 In mongoose **schema** is where we model data, here we describe structure of the data, default values and validation. we then take this schema and create a model out of it. A model is wrapper around the schema which allows us to interact with the data in order to create, update, delete and read documents.
-
-=======
-
-> > > > > > > b475a1e15c39071e871f96b44a467d6c00326211
 
 ## connecting our database with the express app
 
@@ -507,3 +502,23 @@ testTour
 ```
 
 The document is saved in the tours collection (Before this collection did not exist in the database). The collection name is choosen given by pluralizing the Model name.
+
+## Intro to back-end architecture: MVC, types of logic
+
+Now that our app is growing it becomes really important that we design our code architecture. This section is brief introduction to backend arcitecture.
+
+Let's start with MVC architecture. It's a widely used application architecture. There are different ways of implementing this architecture, This is how we will implement.
+
+The model layer is concerned with everything about application data and business logic. The controller layer will handle application's requests, interact with model and send back responses to the client, all that is called application logic. The view layer is necessary if we have a GUI app. In this case The view layer consists of templates used to generate the view, the webpage/website we send back to the client, This is called presentation logic.
+
+Since we are creating an API now, we are not concerned about the views just yet. Using a architecture like this allows us to write modular applications which is easy to maintain and scale as necessary.
+
+![MVC architecture](img/mvc.png)
+
+It all starts with a request, that request will hit one of our routers. The goal of the router is to delegate the request to the correct handler function, which will be in one of the controllers. Then depending on the incoming request the controller might need to interact with one of the models to get certain document from the database or to create a new one. After getting the data the controller might be ready to send back the response (containing data) to the client. In case we want to render a website The controller will select one of the view template and then inject the data into it, now the rendered webpage will be sent as the response. In an express app there is one view template for each page.
+
+One of the big goal of MVC is to separate business logic from application logic. The difference is bit opinionated but this is how it might look -
+
+![Application logic and business logic](img/app_logic.png)
+
+Note that it's almost impossible to 100% separate application logic and business logic, sometimes they will overlap. But we should try our best to keep the application logic in our controllers and business logic in models.
