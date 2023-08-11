@@ -14,14 +14,9 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD,
 );
 
-mongoose
-  .connect(DB, {
-    dbName: 'natours',
-  })
-  .then((con) => {
-    console.log(con.connections);
-    console.log('DB connection successful');
-  });
+mongoose.connect(DB, {
+  dbName: 'natours',
+});
 
 //create a schema
 const tourSchema = new mongoose.Schema({
@@ -48,8 +43,22 @@ const tourSchema = new mongoose.Schema({
 
 //create a model out of schema
 //convention to start a model name with uppercase
-// model method takes two arg- tour name and schema
+// model method takes two arg- name and schema
 const Tour = mongoose.model('Tour', tourSchema);
+
+//create a new tour in database
+
+const testTour = new Tour({
+  name: 'The Forest Hiker',
+  rating: 4.7,
+  price: 497,
+});
+
+//save the new Tour in database
+testTour
+  .save()
+  .then((doc) => console.log(doc))
+  .catch((err) => console.log(err, 'ERROR OCCURED'));
 
 /** express code */
 //using environment variables

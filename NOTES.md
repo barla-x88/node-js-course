@@ -487,3 +487,23 @@ Now let's create a model out of this schema.
 // model method takes two arg- tour name and schema
 const Tour = mongoose.model('Tour', tourSchema);
 ```
+
+## Creating documents in databse
+
+```js
+//create a new tour in database
+
+const testTour = new Tour({
+  name: 'The Forest Hiker',
+  rating: 4.7,
+  price: 497,
+});
+
+//save the new Tour in database
+testTour
+  .save()
+  .then((doc) => console.log(doc))
+  .catch((err) => console.log(err, 'ERROR OCCURED'));
+```
+
+The document is saved in the tours collection (Before this collection did not exist in the database). The collection name is choosen given by pluralizing the Model name.
