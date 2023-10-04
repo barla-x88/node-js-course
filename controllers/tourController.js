@@ -1,21 +1,4 @@
-const fs = require('fs');
-
-//read the data first and convert the JSON to object
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-);
-
 //Middleware to be used tourRoutes.js
-exports.checkID = (req, res, next, val) => {
-  if (val > tours.length) {
-    //return statement is neccessary to that the next() function is not called
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-  next();
-};
 
 //checkBody middleware
 exports.checkBody = (req, res, next) => {
@@ -33,53 +16,27 @@ exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     requestedAt: req.requestTime,
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
+    // results: tours.length,
+    // data: {
+    //   tours: tours,
+    // },
   });
 };
 
 exports.getTour = (req, res) => {
-  //all paramters can be found in req.params object
-  //convert id to integer
-  const id = parseInt(req.params.id);
-
-  const tour = tours.find((tour) => tour.id === id);
-
   //send a response
-  res.status(tour ? 200 : 404).json({
-    status: tour ? 'success' : 'fail',
-    data: {
-      tour,
-    },
+  res.status(200).json({
+    status: 'success',
   });
 };
 
 exports.createTour = (req, res) => {
-  //create new ID for tour
-  const newId = tours[tours.length - 1].id + 1;
-
-  const newTour = { ...req.body, id: newId };
-
-  tours.push(newTour);
-
-  //write new Tour to file
-  //Remember to not call sync functions inside callback,
-  //because we don't want to block event loop
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      //201 = created
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: newTour,
-        },
-      });
-    }
-  );
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tour: '',
+    },
+  });
 };
 
 exports.updateTour = (req, res) => {
